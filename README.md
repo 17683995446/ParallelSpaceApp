@@ -1,5 +1,15 @@
 # ParallelSpaceApp - 安卓分身APP
 
+## ⚠️ 重要通知
+
+**GitHub Actions 当前不可用**（账户免费额度已用完）。
+
+**好消息**: 您可以轻松在本地构建 APK，无需任何额外费用！
+
+👉 **查看本地构建指南**: [LOCAL_BUILD_GUIDE.md](LOCAL_BUILD_GUIDE.md)
+
+---
+
 ## 📱 项目简介
 
 **ParallelSpaceApp** 是一个基于严格二叉树架构的安卓分身应用，采用模块化设计，实现应用多开功能。
@@ -35,6 +45,47 @@ Level 2: clone_manage   process_control
 - **目标SDK**: Android 14 (API 34)
 - **构建工具**: Gradle 8.2
 
+## 📦 快速获取 APK
+
+### 方法 1: Android Studio（推荐 ⭐）
+
+1. 下载 Android Studio: https://developer.android.com/studio
+2. 打开项目：File → Open → 选择项目目录
+3. 构建 APK：Build → Build APK
+4. 获取 APK：点击 locate 查看位置
+
+**预计时间**: 20 分钟
+
+### 方法 2: 命令行
+
+```bash
+# 克隆项目
+git clone https://github.com/17683995446/ParallelSpaceApp.git
+cd ParallelSpaceApp
+
+# 配置 SDK 路径
+echo "sdk.dir=~/Android/Sdk" > local.properties
+
+# 构建
+./gradlew assembleDebug
+
+# APK 位置
+app/build/outputs/apk/debug/app-debug.apk
+```
+
+详细指南：[LOCAL_BUILD_GUIDE.md](LOCAL_BUILD_GUIDE.md)
+
+## 🚀 备选方案
+
+### 升级 GitHub 计划
+- $4/月 GitHub Pro
+- 无限 Actions 分钟
+- 私有仓库无限存储
+
+### 使用其他 CI/CD
+- GitLab CI（每月 2000 分钟免费）
+- Travis CI（开源项目免费）
+
 ## 📂 模块说明
 
 ### business_ability - 业务能力层
@@ -47,37 +98,14 @@ Level 2: clone_manage   process_control
 - **sandbox_isolate**: 沙盒隔离模块
 - **process_control**: 进程调度模块
 
-## 🚀 构建说明
-
-### 使用 GitHub Actions 自动构建
-
-本项目已配置 GitHub Actions 工作流，代码推送到 main 分支后会自动构建 APK。
-
-1. 访问 [Actions](https://github.com/17683995446/ParallelSpaceApp/actions) 查看构建状态
-2. 构建完成后，点击构建任务
-3. 下载 **app-debug-apk** artifact 获取 APK 文件
-
-### 本地构建
-
-```bash
-# 克隆项目
-git clone https://github.com/17683995446/ParallelSpaceApp.git
-cd ParallelSpaceApp
-
-# 配置 Android SDK
-echo 'sdk.dir=/path/to/android-sdk' > local.properties
-
-# 构建 Debug APK
-./gradlew assembleDebug
-
-# APK 输出位置
-# app/build/outputs/apk/debug/app-debug.apk
-```
-
 ## 📄 许可证
 
 本项目仅供学习参考使用。
 
 ## 📧 联系方式
 
-如有问题，请通过 GitHub Issues 反馈。
+GitHub 仓库: https://github.com/17683995446/ParallelSpaceApp
+
+---
+
+**项目代码已完整保存在 GitHub 私有仓库！** 🎉
