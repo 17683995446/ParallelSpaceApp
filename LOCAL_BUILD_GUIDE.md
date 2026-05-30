@@ -7,57 +7,131 @@
 
 ---
 
-## 💻 本地构建（3步曲）
+## 💻 纯命令行构建（推荐 ⭐）
 
-### 第一步：准备环境
+**不需要安装 Android Studio GUI！** 只需要命令行工具即可。
 
-#### 选项 A：使用 Android Studio（推荐）
+### 方案 A：一键安装脚本（最简单）
 
-1. 下载 Android Studio: https://developer.android.com/studio
-2. 安装并启动
-3. SDK 会自动配置
-
-#### 选项 B：使用命令行
+#### Linux/macOS
 
 ```bash
-# 安装 JDK 17
-# Ubuntu/Debian:
+# 给脚本执行权限
+chmod +x install_android_sdk.sh
+
+# 运行安装脚本
+./install_android_sdk.sh
+
+# 安装完成后，构建 APK
+./gradlew assembleDebug
+```
+
+#### Windows PowerShell
+
+```powershell
+# 右键点击 install_android_sdk.ps1
+# 选择"使用 PowerShell 运行"
+# 或在 PowerShell 中运行：
+.\install_android_sdk.ps1
+
+# 安装完成后，构建 APK
+.\gradlew.bat assembleDebug
+```
+
+---
+
+### 方案 B：手动安装
+
+#### 第一步：安装 JDK 17
+
+**Ubuntu/Debian:**
+```bash
+sudo apt update
 sudo apt install openjdk-17-jdk
+```
 
-# macOS:
+**macOS:**
+```bash
 brew install openjdk@17
-
-# Windows: 下载安装包
-# https://adoptium.net/temurin/releases/?version=17
 ```
 
-### 第二步：配置 Android SDK
+**Windows:**
+- 下载: https://adoptium.net/temurin/releases/?version=17
+- 或使用 winget: `winget install EclipseAdoptium.Temurin.17.JDK`
+
+#### 第二步：安装 Android SDK 命令行工具
+
+**Linux:**
+```bash
+# 创建目录
+mkdir -p ~/android-sdk/cmdline-tools
+cd ~/android-sdk/cmdline-tools
+
+# 下载并解压
+curl -O https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+unzip commandlinetools-linux-11076708_latest.zip
+mv cmdline-tools latest
+rm commandlinetools-linux-11076708_latest.zip
+```
+
+**macOS:**
+```bash
+mkdir -p ~/android-sdk/cmdline-tools
+cd ~/android-sdk/cmdline-tools
+curl -O https://dl.google.com/android/repository/commandlinetools-mac-11076708_latest.zip
+unzip commandlinetools-mac-11076708_latest.zip
+mv cmdline-tools latest
+rm commandlinetools-mac-11076708_latest.zip
+```
+
+**Windows (PowerShell):**
+```powershell
+mkdir $env:USERPROFILE\android-sdk\cmdline-tools
+cd $env:USERPROFILE\android-sdk\cmdline-tools
+Invoke-WebRequest -Uri "https://dl.google.com/android/repository/commandlinetools-win-11076708_latest.zip" -OutFile cmdline-tools.zip
+Expand-Archive -Path cmdline-tools.zip -DestinationPath .
+Move-Item -Path cmdline-tools -Destination latest
+Remove-Item cmdline-tools.zip
+```
+
+#### 第三步：安装 SDK 组件
 
 ```bash
-# 创建 local.properties 文件
+# 设置环境变量
+export ANDROID_HOME=~/android-sdk
+export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+
 # Windows PowerShell:
-echo "sdk.dir=C:\Users\YourName\AppData\Local\Android\Sdk" > local.properties
+# $env:ANDROID_HOME = "$env:USERPROFILE\android-sdk"
+# $env:PATH += ";$env:ANDROID_HOME\cmdline-tools\latest\bin;$env:ANDROID_HOME\platform-tools"
 
-# Linux/macOS:
-echo "sdk.dir=~/Android/Sdk" > local.properties
+# 接受许可
+yes | sdkmanager --licenses
+
+# Windows PowerShell:
+# echo y | & "$env:ANDROID_HOME\cmdline-tools\latest\bin\sdkmanager.bat" --licenses
+
+# 安装必需组件
+sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 ```
 
-常见 SDK 路径：
-- **Windows**: `C:\Users\用户名\AppData\Local\Android\Sdk`
-- **macOS**: `~/Library/Android/sdk`
-- **Linux**: `~/Android/Sdk`
-
-### 第三步：构建 APK
+#### 第四步：构建项目
 
 ```bash
-# 给 Gradle Wrapper 执行权限
-chmod +x gradlew
+# 进入项目目录
+cd ParallelSpaceApp
 
-# 构建 Debug 版本
+# 配置 SDK 路径
+echo "sdk.dir=$ANDROID_HOME" > local.properties
+
+# Windows PowerShell:
+# echo "sdk.dir=$env:ANDROID_HOME" > local.properties
+
+# 构建 Debug APK
 ./gradlew assembleDebug
 
-# 或使用一键构建脚本
-./build.sh
+# Windows PowerShell:
+# .\gradlew.bat assembleDebug
 ```
 
 ---
@@ -74,93 +148,38 @@ app/build/outputs/apk/debug/app-debug.apk
 
 ---
 
-## 🔧 完整命令参考
-
-### 基本构建命令
+## 🔧 常用命令
 
 ```bash
-# 克隆项目（如果还没有）
-git clone https://github.com/17683995446/ParallelSpaceApp.git
-cd ParallelSpaceApp
-
-# 配置 SDK
-echo "sdk.dir=~/Android/Sdk" > local.properties
-
 # 构建 Debug APK
 ./gradlew assembleDebug
 
-# 查看 APK
-ls -lh app/build/outputs/apk/debug/app-debug.apk
-```
+# 构建 Release APK
+./gradlew assembleRelease
 
-### 高级构建命令
-
-```bash
 # 清理并重新构建
 ./gradlew clean assembleDebug
-
-# 构建 Release APK（需要签名配置）
-./gradlew assembleRelease
 
 # 查看构建详细信息
 ./gradlew assembleDebug --info
 
 # 并行构建（加快速度）
 ./gradlew assembleDebug --parallel
+
+# 跳过测试
+./gradlew assembleDebug -x test
 ```
 
 ---
 
-## 🚀 快速开始脚本
+## 📊 预计时间
 
-我已经为您准备了自动化构建脚本：
-
-```bash
-# 1. 给脚本执行权限
-chmod +x build.sh
-
-# 2. 运行构建脚本
-./build.sh
-```
-
-脚本会自动：
-- 检查 Java 环境
-- 检查 Gradle 环境
-- 检查 Android SDK
-- 执行构建
-- 显示结果
-
----
-
-## 💡 Windows 用户特别说明
-
-### 使用 Git Bash 或 WSL
-
-推荐使用 Git Bash 或 Windows Subsystem for Linux (WSL)：
-
-```bash
-# 在 Git Bash 中
-./gradlew.bat assembleDebug
-
-# 或在 WSL 中
-./gradlew assembleDebug
-```
-
-### 使用 CMD 或 PowerShell
-
-```cmd
-gradlew.bat assembleDebug
-```
-
----
-
-## 📊 预计构建时间
-
-| 环境 | 首次构建 | 后续构建 |
-|------|---------|---------|
-| Android Studio | 3-5 分钟 | 1-2 分钟 |
-| 命令行（首次） | 5-10 分钟 | 2-3 分钟 |
-| 命令行（缓存） | 2-3 分钟 | 30 秒 |
+| 步骤 | Linux/macOS | Windows |
+|------|------------|---------|
+| JDK 安装 | 5 分钟 | 10 分钟 |
+| SDK 下载安装 | 5-10 分钟 | 10-15 分钟 |
+| 首次构建 | 5-10 分钟 | 10-15 分钟 |
+| **总计** | **15-25 分钟** | **30-40 分钟** |
 
 ---
 
@@ -172,12 +191,12 @@ gradlew.bat assembleDebug
 
 **解决**:
 ```bash
+# 确认 Java 已安装
+java -version
+
 # 设置 JAVA_HOME
 export JAVA_HOME=/path/to/jdk-17
 export PATH=$JAVA_HOME/bin:$PATH
-
-# 验证
-java -version
 ```
 
 ### 问题 2: Android SDK 未找到
@@ -187,8 +206,11 @@ java -version
 **解决**:
 ```bash
 # 设置 ANDROID_HOME
-export ANDROID_HOME=~/Android/Sdk
-export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
+export ANDROID_HOME=~/android-sdk
+export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+
+# 确认设置
+echo $ANDROID_HOME
 ```
 
 ### 问题 3: Gradle 权限错误
@@ -200,94 +222,52 @@ export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
 chmod +x gradlew
 ```
 
-### 问题 4: 构建失败
+### 问题 4: 网络下载失败
 
 **解决**:
-1. 检查网络连接
-2. 清理缓存：`./gradlew clean`
-3. 重新构建：`./gradlew assembleDebug --refresh-dependencies`
+- 检查网络连接
+- 使用代理（如需要）
+- 多次重试
 
----
+### 问题 5: Windows 执行策略错误
 
-## 🎯 构建产物验证
+**错误**: `cannot be loaded because running scripts is disabled`
 
-构建成功后，验证 APK：
-
-```bash
-# 检查 APK 文件
-file app/build/outputs/apk/debug/app-debug.apk
-
-# 查看 APK 信息（需要 aapt）
-aapt dump badging app/build/outputs/apk/debug/app-debug.apk | head -10
-
-# 检查 APK 大小
-ls -lh app/build/outputs/apk/debug/app-debug.apk
+**解决** (PowerShell 管理员):
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 ---
 
-## 📱 安装到手机
+## 🚀 一键构建脚本
 
-### 方法 1: 使用 ADB
+项目已包含自动化脚本：
 
+1. **install_android_sdk.sh** - Linux/macOS SDK 安装脚本
+2. **install_android_sdk.ps1** - Windows SDK 安装脚本
+3. **build.sh** - 构建脚本
+
+使用方式：
 ```bash
-# 连接手机（开启 USB 调试）
-adb install app/build/outputs/apk/debug/app-debug.apk
-```
+# Linux/macOS
+chmod +x install_android_sdk.sh build.sh
+./install_android_sdk.sh
+./build.sh
 
-### 方法 2: 直接传输
-
-1. 将 APK 文件传输到手机
-2. 在手机上点击安装
-
-### 方法 3: Android Studio
-
-1. 打开 Android Studio
-2. 打开项目
-3. 点击 Run 按钮
-
----
-
-## 🔐 Release APK 构建（可选）
-
-Release APK 需要签名配置：
-
-1. 创建签名密钥：
-```bash
-keytool -genkey -v -keystore my-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias my-key-alias
-```
-
-2. 在 `app/build.gradle.kts` 中配置：
-```kotlin
-android {
-    signingConfigs {
-        create("release") {
-            storeFile = file("my-release-key.jks")
-            storePassword = "your-store-password"
-            keyAlias = "my-key-alias"
-            keyPassword = "your-key-password"
-        }
-    }
-    buildTypes {
-        release {
-            signingConfig = signingConfigs.getByName("release")
-        }
-    }
-}
-```
-
-3. 构建 Release APK：
-```bash
-./gradlew assembleRelease
+# Windows PowerShell
+.\install_android_sdk.ps1
+.\build.ps1  # 如果有
 ```
 
 ---
 
-## 🎉 成功标志
+## ✅ 成功标志
 
 构建成功时会显示：
 ```
 BUILD SUCCESSFUL in XXXs
+17:41:42: Task execution finished 'assembleDebug'.
 ```
 
 APK 文件存在：
@@ -297,30 +277,34 @@ app/build/outputs/apk/debug/app-debug.apk
 
 ---
 
-## 📞 获取帮助
+## 📱 安装到手机
 
-如果遇到问题：
+### 使用 ADB
 
-1. 检查 Java 版本：`java -version`（应为 17）
-2. 检查 Gradle 版本：`./gradlew --version`
-3. 检查 SDK：`echo $ANDROID_HOME`
-4. 查看详细错误：`./gradlew assembleDebug --stacktrace`
+```bash
+# 连接手机（开启 USB 调试）
+adb install app/build/outputs/apk/debug/app-debug.apk
+```
+
+### 直接传输
+
+1. 将 APK 文件传输到手机
+2. 在手机上点击安装
 
 ---
 
-## ✅ 总结
+## 🎯 总结
 
-**无需 GitHub Actions！本地构建同样简单：**
+**纯命令行构建 APK，无需 Android Studio GUI：**
 
-1. 安装 Android Studio（或命令行工具）
-2. 配置 SDK 路径
-3. 运行 `./gradlew assembleDebug`
-4. 获取 APK！
+1. ✅ 运行 `install_android_sdk.sh` (或 `.ps1`)
+2. ✅ 运行 `./gradlew assembleDebug`
+3. ✅ 获取 APK
 
-**预计总耗时：10-20 分钟**
+**预计总耗时：20-40 分钟**
 
 ---
 
 **构建愉快！🎉**
 
-如有问题，请参考上方故障排除或重新克隆项目。
+如有问题，请检查常见问题部分或重新运行安装脚本。
